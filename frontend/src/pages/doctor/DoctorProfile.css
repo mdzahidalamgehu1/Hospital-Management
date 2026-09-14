@@ -1,0 +1,967 @@
+/* =========================================================
+   DOCTOR PROFILE PAGE
+   ========================================================= */
+
+.doctor-profile-wrapper {
+  min-height: 100vh;
+  background: #f5f7fb;
+  color: #1e293b;
+}
+
+
+/* =========================================================
+   DOCTOR NAVBAR
+   ========================================================= */
+
+.doctor-navbar {
+  width: 100%;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.05);
+}
+
+.doctor-navbar-container {
+  max-width: 1400px;
+  min-height: 72px;
+  margin: 0 auto;
+  padding: 0 30px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 25px;
+}
+
+
+/* =========================================================
+   NAVBAR LOGO
+   ========================================================= */
+
+.doctor-navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  text-decoration: none;
+  color: #2563eb;
+
+  font-size: 22px;
+  font-weight: 700;
+
+  white-space: nowrap;
+}
+
+.doctor-navbar-logo svg {
+  font-size: 26px;
+}
+
+
+/* =========================================================
+   NAVBAR LINKS
+   ========================================================= */
+
+.doctor-navbar-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  flex: 1;
+}
+
+.doctor-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  padding: 11px 15px;
+
+  text-decoration: none;
+  color: #64748b;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  border-radius: 8px;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.doctor-nav-link svg {
+  font-size: 16px;
+}
+
+.doctor-nav-link:hover {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.doctor-nav-link.active {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   LOGOUT BUTTON
+   ========================================================= */
+
+.doctor-logout-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: none;
+  background: transparent;
+
+  padding: 10px 14px;
+
+  color: #64748b;
+
+  font-size: 14px;
+  font-weight: 500;
+
+  border-radius: 8px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.doctor-logout-btn svg {
+  font-size: 16px;
+}
+
+.doctor-logout-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+/* =========================================================
+   PROFILE PAGE CONTAINER
+   ========================================================= */
+
+.doctor-profile-page {
+  width: 100%;
+  max-width: 1400px;
+
+  margin: 0 auto;
+
+  padding: 35px 30px 50px;
+}
+
+
+/* =========================================================
+   PROFILE HEADER
+   ========================================================= */
+
+.doctor-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 30px;
+}
+
+.doctor-profile-title {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.doctor-profile-icon {
+  width: 58px;
+  height: 58px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: #eff6ff;
+  color: #2563eb;
+
+  border-radius: 12px;
+
+  font-size: 26px;
+}
+
+.doctor-profile-title h1 {
+  margin: 0 0 5px;
+
+  font-size: 28px;
+  font-weight: 700;
+
+  color: #0f172a;
+}
+
+.doctor-profile-title p {
+  margin: 0;
+
+  color: #64748b;
+
+  font-size: 14px;
+}
+
+
+/* =========================================================
+   EDIT BUTTON
+   ========================================================= */
+
+.doctor-edit-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: none;
+
+  padding: 11px 18px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.doctor-edit-btn:hover {
+  background: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.2);
+}
+
+
+/* =========================================================
+   CANCEL BUTTON
+   ========================================================= */
+
+.doctor-cancel-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  border: 1px solid #e2e8f0;
+
+  padding: 11px 18px;
+
+  background: #ffffff;
+  color: #475569;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.doctor-cancel-btn:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+
+
+/* =========================================================
+   SUCCESS MESSAGE
+   ========================================================= */
+
+.doctor-success-message {
+  margin-bottom: 20px;
+
+  padding: 13px 16px;
+
+  background: #ecfdf5;
+  border: 1px solid #a7f3d0;
+
+  color: #047857;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   ERROR MESSAGE
+   ========================================================= */
+
+.doctor-error-message {
+  margin-bottom: 20px;
+
+  padding: 13px 16px;
+
+  background: #fef2f2;
+  border: 1px solid #fecaca;
+
+  color: #dc2626;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 500;
+}
+
+
+/* =========================================================
+   PROFILE GRID
+   ========================================================= */
+
+.doctor-profile-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 22px;
+}
+
+
+/* =========================================================
+   PROFILE CARD
+   ========================================================= */
+
+.doctor-profile-card {
+  background: #ffffff;
+
+  border: 1px solid #e5e7eb;
+
+  border-radius: 12px;
+
+  padding: 25px;
+
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04);
+}
+
+.doctor-profile-card h2 {
+  margin: 0 0 22px;
+
+  color: #0f172a;
+
+  font-size: 18px;
+  font-weight: 650;
+
+  padding-bottom: 15px;
+
+  border-bottom: 1px solid #eef2f7;
+}
+
+
+/* =========================================================
+   INFORMATION GRID
+   ========================================================= */
+
+.doctor-info-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 22px 25px;
+}
+
+.doctor-info-item {
+  display: flex;
+  flex-direction: column;
+
+  gap: 6px;
+
+  min-width: 0;
+}
+
+.doctor-info-item span {
+  color: #94a3b8;
+
+  font-size: 12px;
+  font-weight: 600;
+
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.doctor-info-item strong {
+  color: #334155;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  word-break: break-word;
+}
+
+
+/* =========================================================
+   ACTIVE STATUS
+   ========================================================= */
+
+.doctor-active-status {
+  display: inline-flex;
+
+  width: fit-content;
+
+  padding: 5px 10px;
+
+  background: #ecfdf5;
+  color: #059669 !important;
+
+  border-radius: 20px;
+
+  font-size: 12px !important;
+
+  text-transform: capitalize;
+}
+
+
+/* =========================================================
+   AVAILABILITY
+   ========================================================= */
+
+.availability-section {
+  display: flex;
+  flex-direction: column;
+
+  gap: 25px;
+}
+
+.availability-label {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color: #64748b;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.doctor-days {
+  display: flex;
+  flex-wrap: wrap;
+
+  gap: 8px;
+}
+
+.doctor-day {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 7px 12px;
+
+  background: #eff6ff;
+  color: #2563eb;
+
+  border-radius: 20px;
+
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.doctor-time {
+  display: flex;
+  flex-direction: column;
+}
+
+.doctor-time strong {
+  color: #334155;
+
+  font-size: 15px;
+  font-weight: 600;
+}
+
+
+/* =========================================================
+   EDIT FORM
+   ========================================================= */
+
+.doctor-profile-form {
+  display: flex;
+  flex-direction: column;
+
+  gap: 22px;
+}
+
+.doctor-profile-form .doctor-profile-card {
+  width: 100%;
+}
+
+
+/* =========================================================
+   FORM GRID
+   ========================================================= */
+
+.doctor-form-grid {
+  display: grid;
+
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  gap: 20px;
+}
+
+
+/* =========================================================
+   FORM GROUP
+   ========================================================= */
+
+.doctor-form-group {
+  display: flex;
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.doctor-form-group label {
+  color: #334155;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.doctor-form-group input {
+  width: 100%;
+
+  box-sizing: border-box;
+
+  padding: 12px 13px;
+
+  border: 1px solid #dbe2ea;
+
+  background: #ffffff;
+
+  color: #1e293b;
+
+  border-radius: 8px;
+
+  outline: none;
+
+  font-size: 14px;
+
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.doctor-form-group input::placeholder {
+  color: #94a3b8;
+}
+
+.doctor-form-group input:focus {
+  border-color: #2563eb;
+
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+
+/* =========================================================
+   AVAILABLE DAYS SELECTION
+   ========================================================= */
+
+.doctor-days-selection {
+  display: flex;
+
+  flex-wrap: wrap;
+
+  gap: 12px;
+}
+
+.doctor-day-checkbox {
+  display: flex;
+  align-items: center;
+
+  gap: 8px;
+
+  padding: 10px 14px;
+
+  background: #f8fafc;
+
+  border: 1px solid #e2e8f0;
+
+  border-radius: 8px;
+
+  color: #475569;
+
+  font-size: 13px;
+  font-weight: 500;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.doctor-day-checkbox:hover {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  color: #2563eb;
+}
+
+.doctor-day-checkbox input {
+  width: 15px;
+  height: 15px;
+
+  margin: 0;
+
+  accent-color: #2563eb;
+
+  cursor: pointer;
+}
+
+.doctor-day-checkbox:has(input:checked) {
+  background: #eff6ff;
+  border-color: #93c5fd;
+  color: #2563eb;
+}
+
+
+/* =========================================================
+   SAVE BUTTON
+   ========================================================= */
+
+.doctor-save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  align-self: flex-start;
+
+  padding: 12px 22px;
+
+  border: none;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  border-radius: 8px;
+
+  font-size: 14px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.doctor-save-btn:hover {
+  background: #1d4ed8;
+
+  transform: translateY(-1px);
+
+  box-shadow: 0 5px 12px rgba(37, 99, 235, 0.2);
+}
+
+.doctor-save-btn:active {
+  transform: translateY(0);
+}
+
+
+/* =========================================================
+   LOADING
+   ========================================================= */
+
+.doctor-profile-loading {
+  min-height: 60vh;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #64748b;
+
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   PROFILE ERROR PAGE
+   ========================================================= */
+
+.doctor-profile-error {
+  max-width: 700px;
+
+  margin: 50px auto;
+
+  padding: 20px;
+
+  text-align: center;
+
+  background: #fef2f2;
+
+  border: 1px solid #fecaca;
+
+  color: #dc2626;
+
+  border-radius: 10px;
+
+  font-size: 15px;
+}
+
+
+/* =========================================================
+   RESPONSIVE - TABLET
+   ========================================================= */
+
+@media (max-width: 1000px) {
+
+  .doctor-navbar-container {
+    padding: 0 20px;
+  }
+
+  .doctor-navbar-links {
+    gap: 3px;
+  }
+
+  .doctor-nav-link {
+    padding: 10px 10px;
+  }
+
+  .doctor-nav-link span {
+    font-size: 13px;
+  }
+
+  .doctor-profile-page {
+    padding: 30px 20px 45px;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - 800px
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+  .doctor-profile-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .doctor-navbar-container {
+    min-height: 65px;
+
+    gap: 12px;
+  }
+
+  .doctor-navbar-logo span {
+    display: none;
+  }
+
+  .doctor-navbar-logo svg {
+    font-size: 25px;
+  }
+
+  .doctor-navbar-links {
+    gap: 2px;
+  }
+
+  .doctor-nav-link {
+    padding: 9px 8px;
+  }
+
+  .doctor-nav-link span {
+    display: none;
+  }
+
+  .doctor-nav-link svg {
+    font-size: 18px;
+  }
+
+  .doctor-logout-btn span {
+    display: none;
+  }
+
+  .doctor-logout-btn {
+    padding: 10px;
+  }
+
+}
+
+
+/* =========================================================
+   RESPONSIVE - MOBILE
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .doctor-navbar-container {
+    padding: 0 15px;
+
+    gap: 5px;
+  }
+
+  .doctor-navbar-links {
+    flex: 1;
+
+    justify-content: space-around;
+  }
+
+  .doctor-nav-link {
+    padding: 9px 7px;
+  }
+
+  .doctor-navbar-logo {
+    font-size: 20px;
+  }
+
+  .doctor-logout-btn {
+    padding: 8px;
+  }
+
+
+  /* Profile */
+
+  .doctor-profile-page {
+    padding: 22px 15px 35px;
+  }
+
+  .doctor-profile-header {
+    align-items: flex-start;
+
+    gap: 15px;
+
+    margin-bottom: 22px;
+  }
+
+  .doctor-profile-title {
+    gap: 10px;
+  }
+
+  .doctor-profile-icon {
+    width: 48px;
+    height: 48px;
+
+    font-size: 21px;
+  }
+
+  .doctor-profile-title h1 {
+    font-size: 22px;
+  }
+
+  .doctor-profile-title p {
+    font-size: 12px;
+  }
+
+  .doctor-edit-btn,
+  .doctor-cancel-btn {
+    padding: 9px 12px;
+
+    font-size: 12px;
+
+    white-space: nowrap;
+  }
+
+  .doctor-profile-card {
+    padding: 20px;
+  }
+
+  .doctor-profile-card h2 {
+    font-size: 16px;
+
+    margin-bottom: 18px;
+  }
+
+  .doctor-info-grid {
+    grid-template-columns: 1fr;
+
+    gap: 17px;
+  }
+
+  .doctor-form-grid {
+    grid-template-columns: 1fr;
+
+    gap: 17px;
+  }
+
+  .doctor-days-selection {
+    gap: 8px;
+  }
+
+  .doctor-day-checkbox {
+    padding: 8px 10px;
+
+    font-size: 12px;
+  }
+
+  .doctor-save-btn {
+    width: 100%;
+  }
+
+}
+
+
+/* =========================================================
+   VERY SMALL MOBILE
+   ========================================================= */
+
+@media (max-width: 400px) {
+
+  .doctor-navbar-container {
+    padding: 0 10px;
+  }
+
+  .doctor-nav-link {
+    padding: 8px 5px;
+  }
+
+  .doctor-nav-link svg {
+    font-size: 16px;
+  }
+
+  .doctor-logout-btn {
+    padding: 7px;
+  }
+
+  .doctor-profile-page {
+    padding: 18px 10px 30px;
+  }
+
+  .doctor-profile-header {
+    flex-direction: column;
+  }
+
+  .doctor-edit-btn,
+  .doctor-cancel-btn {
+    align-self: flex-start;
+  }
+
+  .doctor-profile-card {
+    padding: 17px;
+  }
+
+  .doctor-profile-title h1 {
+    font-size: 20px;
+  }
+
+}

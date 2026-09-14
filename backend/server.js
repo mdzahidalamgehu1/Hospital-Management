@@ -2,8 +2,6 @@ const express = require("express");
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
 const dotenv = require("dotenv");
-const jwt = require("jsonwebtoken");
-const bcrypt = require("bcryptjs");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const adminRoutes = require("./routes/adminRoutes");
@@ -38,12 +36,6 @@ app.use("/api/departments", departmentRoutes);
 app.use("/api/doctors", doctorRoutes);
 app.use("/api/patients", patientRoutes);
 app.use("/api/appointments", appointmentRoutes);
-app.use(cors({
-    origin: "http://localhost:5173",
-    credentials: true
-}));
-
-
 
 // Test Route
 app.get("/", (req, res) => {

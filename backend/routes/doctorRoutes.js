@@ -6,12 +6,16 @@ const {
   getDoctorById,
   updateDoctor,
   deleteDoctor,
+  getMyDoctorProfile,
+  updateMyDoctorProfile,
 } = require("../controllers/doctorController");
 
 const protect = require("../middleware/authMiddleware");
 const authorize = require("../middleware/roleMiddleware");
 
 const router = express.Router();
+
+console.log(typeof getMyDoctorProfile); // Check the type of getMyDoctorProfile);
 
 // Create Doctor - Admin only
 router.post(
@@ -21,12 +25,29 @@ router.post(
   createDoctor
 );
 
+// Logged-in doctor's profile
+router.get(
+  "/me",
+  protect,
+  authorize("doctor"),
+  getMyDoctorProfile
+);
+
+router.put(
+  "/me",
+  protect,
+  authorize("doctor"),
+  updateMyDoctorProfile
+);
+
+
 // Get All Doctors - Logged-in users
 router.get(
   "/",
   protect,
   getAllDoctors
 );
+
 
 // Get Doctor By ID - Logged-in users
 router.get(

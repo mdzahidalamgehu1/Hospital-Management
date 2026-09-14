@@ -191,6 +191,105 @@ const deleteDoctor = async (req, res) => {
     });
   }
 };
+// Get logged-in doctor profile
+const getMyDoctorProfile = async (req, res) => {
+  try {
+    const doctor = await Doctor.findOne({
+      user: req.user.id,
+    })
+      .populate("user", "name email role")
+      .populate("department", "name description");
+
+    if (!doctor) {
+      return res.status(404).json({
+        message: "Doctor profile not found",
+      });
+    }
+
+    res.status(200).json({
+      doctor,
+    });
+  } catch (error) {
+    console.error("Get doctor profile error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch doctor profile",
+      error: error.message,
+    });
+  }
+};
+
+
+// Update logged-in doctor profile
+const updateMyDoctorProfile = async (req, res) => {
+  try {
+    const {
+      specialization,
+      qualifications,
+      experience,
+      phone,
+      consultationFee,
+      availableDays,
+      availableTime,
+    } = req.body;
+
+    const doctor = await Doctor.findOne({
+      user: req.user.id,
+    });
+
+    if (!doctor) {
+      return res.status(404).json({
+        message: "Doctor profile not found",
+      });
+    }
+
+    if (specialization !== undefined) {
+      doctor.specialization = specialization;
+    }
+
+    if (qualifications !== undefined) {
+      doctor.qualifications = qualifications;
+    }
+
+    if (experience !== undefined) {
+      doctor.experience = experience;
+    }
+
+    if (phone !== undefined) {
+      doctor.phone = phone;
+    }
+
+    if (consultationFee !== undefined) {
+      doctor.consultationFee = consultationFee;
+    }
+
+    if (availableDays !== undefined) {
+      doctor.availableDays = availableDays;
+    }
+
+    if (availableTime !== undefined) {
+      doctor.availableTime = availableTime;
+    }
+
+    await doctor.save();
+
+    const updatedDoctor = await Doctor.findById(doctor._id)
+      .populate("user", "name email role")
+      .populate("department", "name description");
+
+    res.status(200).json({
+      message: "Doctor profile updated successfully",
+      doctor: updatedDoctor,
+    });
+  } catch (error) {
+    console.error("Update doctor profile error:", error);
+
+    res.status(500).json({
+      message: "Failed to update doctor profile",
+      error: error.message,
+    });
+  }
+};
 
 module.exports = {
   createDoctor,
@@ -198,4 +297,6 @@ module.exports = {
   getDoctorById,
   updateDoctor,
   deleteDoctor,
+  getMyDoctorProfile,
+  updateMyDoctorProfile,
 };

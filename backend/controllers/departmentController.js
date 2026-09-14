@@ -1,8 +1,14 @@
 const Department = require("../models/Department");
 
-
-console.log("department type: ", typeof Department)
-console.log("department create: ", typeof Department.create)
+// Get all departments
+const getAllDepartments = async (req, res) => {
+  try {
+    const departments = await Department.find().sort({ name: 1 });
+    res.status(200).json({ departments });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
 
 // Create Department
 const createDepartment = async (req, res) => {
@@ -110,6 +116,7 @@ const deleteDepartment = async (req, res) => {
 };
 
 module.exports = {
+  getAllDepartments,
   createDepartment,
   getDepartmentById,
   updateDepartment,

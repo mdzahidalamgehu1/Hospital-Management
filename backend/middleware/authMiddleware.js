@@ -2,7 +2,7 @@ const jwt = require ("jsonwebtoken");
 
 const protect = (req, res, next) => {
   try{
-    const token = req.cookies.token;
+    const token = req.cookies?.token;
     
     if(!token){
       return res.status(401).json({
@@ -10,7 +10,7 @@ const protect = (req, res, next) => {
       });
     }
 
-    const decode = jwt.verify(token, process.env.jwt_SECRET);
+    const decode = jwt.verify(token, process.env.JWT_SECRET);
 
     req.user = decode;
 

@@ -3,6 +3,7 @@ const express = require("express");
 const {
   createAppointment,
   getAllAppointments,
+  getDoctorPatients,
   getAppointmentById,
   updateAppointment,
   deleteAppointment,
@@ -25,8 +26,16 @@ router.post(
 router.get(
   "/",
   protect,
-  authorize("admin", "doctor"),
+  authorize("admin", "doctor", "patient"),
   getAllAppointments
+);
+
+//get doctor patients
+router.get(
+  "/doctor/patients",
+  protect,
+  authorize("doctor"),
+  getDoctorPatients
 );
 
 // Get Single Appointment
@@ -41,7 +50,7 @@ router.get(
 router.put(
   "/:id",
   protect,
-  authorize("admin", "doctor"),
+  authorize("admin", "doctor", "patient"),
   updateAppointment
 );
 
@@ -52,5 +61,7 @@ router.delete(
   authorize("admin", "doctor"),
   deleteAppointment
 );
+
+
 
 module.exports = router;

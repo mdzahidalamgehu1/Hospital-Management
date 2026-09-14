@@ -1,6 +1,100 @@
 const Patient = require("../models/Patient");
 const User = require("../models/User");
 
+// Get logged-in patient profile
+const getMyProfile = async (req, res) => {
+  try {
+    const patient = await Patient.findOne({
+      user: req.user.id,
+    }).populate("user", "name email role");
+
+    if (!patient) {
+      return res.status(404).json({
+        message: "Patient profile not found",
+      });
+    }
+
+    res.status(200).json({
+      message: "Patient profile retrieved successfully",
+      patient,
+    });
+  } catch (error) {
+    console.error("Get patient profile error:", error);
+
+    res.status(500).json({
+      message: "Failed to fetch patient profile",
+      error: error.message,
+    });
+  }
+};
+
+
+// Update logged-in patient profile
+const updateMyProfile = async (req, res) => {
+  try {
+    const {
+      dateOfBirth,
+      gender,
+      bloodGroup,
+      phone,
+      address,
+      emergencyContact,
+    } = req.body;
+
+    const patient = await Patient.findOne({
+      user: req.user.id,
+    });
+
+    if (!patient) {
+      return res.status(404).json({
+        message: "Patient profile not found",
+      });
+    }
+
+    if (dateOfBirth !== undefined) {
+      patient.dateOfBirth = dateOfBirth;
+    }
+
+    if (gender !== undefined) {
+      patient.gender = gender;
+    }
+
+    if (bloodGroup !== undefined) {
+      patient.bloodGroup = bloodGroup;
+    }
+
+    if (phone !== undefined) {
+      patient.phone = phone;
+    }
+
+    if (address !== undefined) {
+      patient.address = address;
+    }
+
+    if (emergencyContact !== undefined) {
+      patient.emergencyContact = emergencyContact;
+    }
+
+    await patient.save();
+
+    const updatedPatient = await Patient.findById(
+      patient._id
+    ).populate("user", "name email role");
+
+    res.status(200).json({
+      message: "Profile updated successfully",
+      patient: updatedPatient,
+    });
+  } catch (error) {
+    console.error("Update patient profile error:", error);
+
+    res.status(500).json({
+      message: "Failed to update patient profile",
+      error: error.message,
+    });
+  }
+};
+
 // Create Patient
 const createPatient = async (req, res) => {
   try {
@@ -185,4 +279,6 @@ module.exports = {
   getPatientById,
   updatePatient,
   deletePatient,
+  getMyProfile,
+  updateMyProfile,
 };
