@@ -8,6 +8,7 @@ const PatientProfile = () => {
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [message, setMessage] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     dateOfBirth: "",
@@ -20,9 +21,13 @@ const PatientProfile = () => {
     emergencyRelation: "",
   });
 
+  // =========================
+  // GET PATIENT PROFILE
+  // =========================
   const fetchProfile = async () => {
     try {
       setLoading(true);
+      setMessage("");
 
       const response = await api.get("/patients/me");
 
@@ -46,8 +51,10 @@ const PatientProfile = () => {
         emergencyPhone:
           patientData.emergencyContact?.phone || "",
 
+        // IMPORTANT:
+        // Backend uses "relationship"
         emergencyRelation:
-          patientData.emergencyContact?.relation || "",
+          patientData.emergencyContact?.relationship || "",
       });
     } catch (error) {
       console.error("Fetch patient profile error:", error);
@@ -65,17 +72,26 @@ const PatientProfile = () => {
     fetchProfile();
   }, []);
 
+  // =========================
+  // HANDLE INPUT CHANGE
+  // =========================
   const handleChange = (e) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
+  // =========================
+  // UPDATE PROFILE
+  // =========================
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      setSaving(true);
       setMessage("");
 
       await api.put("/patients/me", {
@@ -88,7 +104,10 @@ const PatientProfile = () => {
         emergencyContact: {
           name: formData.emergencyName,
           phone: formData.emergencyPhone,
-          relation: formData.emergencyRelation,
+
+          // IMPORTANT:
+          // Backend expects "relationship"
+          relationship: formData.emergencyRelation,
         },
       });
 
@@ -96,7 +115,7 @@ const PatientProfile = () => {
 
       setEditing(false);
 
-      fetchProfile();
+      await fetchProfile();
     } catch (error) {
       console.error("Update profile error:", error);
 
@@ -104,13 +123,19 @@ const PatientProfile = () => {
         error.response?.data?.message ||
           "Failed to update profile"
       );
+    } finally {
+      setSaving(false);
     }
   };
 
+  // =========================
+  // LOADING
+  // =========================
   if (loading) {
     return (
       <div className="patient-page">
         <PatientNavbar />
+
         <p className="page-loading">
           Loading profile...
         </p>
@@ -118,10 +143,14 @@ const PatientProfile = () => {
     );
   }
 
+  // =========================
+  // PROFILE NOT FOUND
+  // =========================
   if (!patient) {
     return (
       <div className="patient-page">
         <PatientNavbar />
+
         <p className="page-error">
           {message || "Profile not found"}
         </p>
@@ -129,38 +158,51 @@ const PatientProfile = () => {
     );
   }
 
+  // =========================
+  // MAIN UI
+  // =========================
   return (
     <div className="patient-page">
       <PatientNavbar />
 
       <main className="patient-container">
 
+        {/* HEADER */}
         <div className="profile-header">
           <div>
             <h1>My Profile</h1>
+
             <p>
               Manage your personal and medical information.
             </p>
           </div>
 
           <button
+            type="button"
             className="profile-edit-btn"
-            onClick={() => setEditing(!editing)}
+            onClick={() => {
+              setEditing(!editing);
+              setMessage("");
+            }}
           >
             {editing ? "Cancel" : "Edit Profile"}
           </button>
         </div>
 
+        {/* MESSAGE */}
         {message && (
           <div className="profile-message">
             {message}
           </div>
         )}
 
+        {/* =========================
+            VIEW PROFILE
+        ========================= */}
         {!editing ? (
           <div className="profile-grid">
 
-            {/* Personal Information */}
+            {/* PERSONAL INFORMATION */}
             <section className="profile-card">
               <h2>Personal Information</h2>
 
@@ -168,6 +210,7 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Full Name</span>
+
                   <strong>
                     {patient.user?.name || "N/A"}
                   </strong>
@@ -175,6 +218,7 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Email</span>
+
                   <strong>
                     {patient.user?.email || "N/A"}
                   </strong>
@@ -182,6 +226,7 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Phone</span>
+
                   <strong>
                     {patient.phone || "N/A"}
                   </strong>
@@ -189,6 +234,7 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Date of Birth</span>
+
                   <strong>
                     {patient.dateOfBirth
                       ? new Date(
@@ -200,6 +246,7 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Gender</span>
+
                   <strong>
                     {patient.gender || "N/A"}
                   </strong>
@@ -207,6 +254,7 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Blood Group</span>
+
                   <strong>
                     {patient.bloodGroup || "N/A"}
                   </strong>
@@ -215,19 +263,20 @@ const PatientProfile = () => {
               </div>
             </section>
 
-            {/* Address */}
+            {/* ADDRESS */}
             <section className="profile-card">
               <h2>Address</h2>
 
               <div className="single-info">
                 <span>Residential Address</span>
+
                 <strong>
                   {patient.address || "N/A"}
                 </strong>
               </div>
             </section>
 
-            {/* Emergency Contact */}
+            {/* EMERGENCY CONTACT */}
             <section className="profile-card">
               <h2>Emergency Contact</h2>
 
@@ -235,27 +284,34 @@ const PatientProfile = () => {
 
                 <div>
                   <span>Name</span>
+
                   <strong>
-                    {patient.emergencyContact?.name || "N/A"}
+                    {patient.emergencyContact?.name ||
+                      "N/A"}
                   </strong>
                 </div>
 
                 <div>
                   <span>Phone</span>
+
                   <strong>
-                    {patient.emergencyContact?.phone || "N/A"}
+                    {patient.emergencyContact?.phone ||
+                      "N/A"}
                   </strong>
                 </div>
 
                 <div>
-                  <span>Relation</span>
+                  <span>Relationship</span>
+
                   <strong>
-                    {patient.emergencyContact?.relation || "N/A"}
+                    {patient.emergencyContact?.relationship ||
+                      "N/A"}
                   </strong>
                 </div>
 
                 <div>
                   <span>Account Status</span>
+
                   <strong className="status-active">
                     {patient.status || "active"}
                   </strong>
@@ -267,16 +323,21 @@ const PatientProfile = () => {
           </div>
         ) : (
 
+          /* =========================
+             EDIT PROFILE
+          ========================= */
           <form
             className="profile-edit-form"
             onSubmit={handleSubmit}
           >
 
+            {/* PERSONAL INFORMATION */}
             <section className="profile-card">
               <h2>Edit Personal Information</h2>
 
               <div className="form-grid">
 
+                {/* DOB */}
                 <div className="form-group">
                   <label>Date of Birth</label>
 
@@ -288,6 +349,7 @@ const PatientProfile = () => {
                   />
                 </div>
 
+                {/* GENDER */}
                 <div className="form-group">
                   <label>Gender</label>
 
@@ -314,6 +376,7 @@ const PatientProfile = () => {
                   </select>
                 </div>
 
+                {/* BLOOD GROUP */}
                 <div className="form-group">
                   <label>Blood Group</label>
 
@@ -326,6 +389,7 @@ const PatientProfile = () => {
                   />
                 </div>
 
+                {/* PHONE */}
                 <div className="form-group">
                   <label>Phone</label>
 
@@ -334,9 +398,11 @@ const PatientProfile = () => {
                     name="phone"
                     value={formData.phone}
                     onChange={handleChange}
+                    placeholder="Enter phone number"
                   />
                 </div>
 
+                {/* ADDRESS */}
                 <div className="form-group full-width">
                   <label>Address</label>
 
@@ -345,18 +411,20 @@ const PatientProfile = () => {
                     value={formData.address}
                     onChange={handleChange}
                     rows="3"
+                    placeholder="Enter your address"
                   />
                 </div>
 
               </div>
             </section>
 
-
+            {/* EMERGENCY CONTACT */}
             <section className="profile-card">
               <h2>Emergency Contact</h2>
 
               <div className="form-grid">
 
+                {/* NAME */}
                 <div className="form-group">
                   <label>Contact Name</label>
 
@@ -365,9 +433,11 @@ const PatientProfile = () => {
                     name="emergencyName"
                     value={formData.emergencyName}
                     onChange={handleChange}
+                    placeholder="Example: Rahul"
                   />
                 </div>
 
+                {/* PHONE */}
                 <div className="form-group">
                   <label>Contact Phone</label>
 
@@ -376,11 +446,13 @@ const PatientProfile = () => {
                     name="emergencyPhone"
                     value={formData.emergencyPhone}
                     onChange={handleChange}
+                    placeholder="Enter phone number"
                   />
                 </div>
 
+                {/* RELATIONSHIP */}
                 <div className="form-group">
-                  <label>Relation</label>
+                  <label>Relationship</label>
 
                   <input
                     type="text"
@@ -394,11 +466,15 @@ const PatientProfile = () => {
               </div>
             </section>
 
+            {/* SAVE BUTTON */}
             <button
               type="submit"
               className="save-profile-btn"
+              disabled={saving}
             >
-              Save Changes
+              {saving
+                ? "Saving..."
+                : "Save Changes"}
             </button>
 
           </form>

@@ -1,9 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
 import ProtectedRoute from "./components/ProtectedRoute";
 
+// Admin
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import Departments from "./pages/admin/Departments";
 import Doctors from "./pages/admin/Doctors";
@@ -11,27 +13,39 @@ import Appointments from "./pages/admin/Appointments";
 import Patients from "./pages/admin/Patients";
 import CreatePatient from "./pages/admin/CreatePatient";
 
+// Doctor
 import DoctorDashboard from "./pages/doctor/DoctorDashboard";
 import DoctorPatients from "./pages/doctor/DoctorPatients";
 import DoctorAppointments from "./pages/doctor/DoctorAppointments";
 import DoctorProfile from "./pages/doctor/DoctorProfile";
+
+// Patient
 import PatientDashboard from "./pages/patient/PatientDashboard";
-import BookAppointment from "./pages/patient/BookAppointment";
 import PatientAppointments from "./pages/patient/PatientAppointments";
+import BookAppointment from "./pages/patient/BookAppointment";
 import PatientProfile from "./pages/patient/PatientProfile";
+
 
 function App() {
   return (
     <BrowserRouter>
       <Routes>
 
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        {/* ================= LOGIN / REGISTER ================= */}
 
-        {/* Authentication */}
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route
+          path="/login"
+          element={<Login />}
+        />
 
-        {/* Admin Dashboard */}
+        <Route
+          path="/register"
+          element={<Register />}
+        />
+
+
+        {/* ================= ADMIN ================= */}
+
         <Route
           path="/admin"
           element={
@@ -41,7 +55,6 @@ function App() {
           }
         />
 
-        {/* Admin Departments */}
         <Route
           path="/admin/departments"
           element={
@@ -51,7 +64,6 @@ function App() {
           }
         />
 
-        {/* Admin Doctors */}
         <Route
           path="/admin/doctors"
           element={
@@ -61,7 +73,6 @@ function App() {
           }
         />
 
-        {/* Admin Patients */}
         <Route
           path="/admin/patients"
           element={
@@ -71,7 +82,6 @@ function App() {
           }
         />
 
-        {/* Admin Appointments */}
         <Route
           path="/admin/appointments"
           element={
@@ -80,6 +90,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+
         <Route
           path="/admin/patients/create"
           element={
@@ -89,7 +100,9 @@ function App() {
           }
         />
 
-        {/* Doctor Dashboard */}
+
+        {/* ================= DOCTOR ================= */}
+
         <Route
           path="/doctor"
           element={
@@ -126,7 +139,9 @@ function App() {
           }
         />
 
-        {/* Patient Dashboard */}
+
+        {/* ================= PATIENT ================= */}
+
         <Route
           path="/patient"
           element={
@@ -135,6 +150,16 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        <Route
+          path="/patient/appointments"
+          element={
+            <ProtectedRoute allowedRoles={["patient"]}>
+              <PatientAppointments />
+            </ProtectedRoute>
+          }
+        />
+
         <Route
           path="/patient/book-appointment"
           element={
@@ -143,11 +168,13 @@ function App() {
             </ProtectedRoute>
           }
         />
+
+        {/* THIS IS THE IMPORTANT ROUTE */}
         <Route
-          path="/patient/appointments"
+          path="/patient/profile"
           element={
             <ProtectedRoute allowedRoles={["patient"]}>
-              <PatientAppointments />
+              <PatientProfile />
             </ProtectedRoute>
           }
         />

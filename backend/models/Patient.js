@@ -41,20 +41,15 @@ const patientSchema = new mongoose.Schema(
     emergencyContact: {
       name: {
         type: String,
-        required: true,
-        trim: true,
+
       },
 
       phone: {
         type: String,
-        required: true,
-        trim: true,
       },
 
       relationship: {
         type: String,
-        required: true,
-        trim: true,
       },
     },
 

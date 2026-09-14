@@ -89,12 +89,11 @@ const updateMyProfile = async (req, res) => {
     console.error("Update patient profile error:", error);
 
     res.status(500).json({
-      message: "Failed to update patient profile",
+      message: "Failed to update profile",
       error: error.message,
     });
   }
 };
-
 // Create Patient
 const createPatient = async (req, res) => {
   try {
