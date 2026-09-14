@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: process.env.API,
+  baseURL: "https://hospital-management-siru.onrender.com/api",
   withCredentials: true,
 });
 export default api;
