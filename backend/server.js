@@ -21,7 +21,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://hospital-management-chi-sable.vercel.app/" || "http://localhost:5173",
     credentials: true
 }));
 
