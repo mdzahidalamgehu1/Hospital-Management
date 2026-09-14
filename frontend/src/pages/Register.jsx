@@ -32,30 +32,13 @@ const Register = () => {
       setTimeout(() => {
         navigate("/login");
       }, 1000);
-  //   } catch (error) {
-  //     setMessage(
-  //       error.response?.data?.message ||
-  //         "Registration failed"
-  //     );
-  //   }
-  // };
-  } catch (error) {
-  console.log("========== REGISTER ERROR ==========");
-  console.log("Error:", error);
-  console.log("Message:", error.message);
-  console.log("Code:", error.code);
-  console.log("Response:", error.response);
-  console.log("Response Data:", error.response?.data);
-  console.log("Request:", error.request);
-
-  setMessage(
-    error.response?.data?.message ||
-    error.message ||
-    "Registration failed"
-  );
-} finally {
-  setLoading(false);
-}
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message ||
+          "Registration failed"
+      );
+    }
+  };
 
   return (
     <div>
