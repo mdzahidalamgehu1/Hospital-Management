@@ -21,7 +21,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: "https://hospital-management-ay37-eight.vercel.app/",
+    origin: "https://hospital-management-ay37-eight.vercel.app",
     credentials: true
 }));
 
