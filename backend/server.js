@@ -21,7 +21,7 @@ connectDB();
 
 // Middleware
 app.use(cors({
-    origin: "https://hospital-management-la01rcrp7-md-zahid-alams-projects.vercel.app/" || "http://localhost:5173",
+    origin: "https://hospital-management-la01rcrp7-md-zahid-alams-projects.vercel.app/",
     credentials: true
 }));
 
