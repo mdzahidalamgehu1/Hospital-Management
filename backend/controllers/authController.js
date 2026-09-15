@@ -1,4 +1,5 @@
 const User = require("../models/User");
+const Patient = require("../models/Patient");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -38,21 +39,25 @@ const registerUser = async (req, res) => {
       { expiresIn: "1h" }
     );
 
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 3600000,
-    });
+    if (user.role === "patient") {
+      await Patient.create({
+        user: user._id,
+        dateOfBirth: new Date(),
+        gender: "other",
+        bloodGroup: "O+",
+        phone: "Not provided",
+        address: "Not provided",
+        emergencyContact: {
+          name: "Not provided",
+          phone: "Not provided",
+          relationship: "Not provided",
+        },
+      });
+    }
 
     res.status(201).json({
       token,
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
+      user: { id: user._id, name: user.name, email: user.email, role: user.role },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -91,7 +96,7 @@ const loginUser = async (req, res) => {
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      sameSite: "strict",
       maxAge: 3600000, // 1 hour
     });
 
