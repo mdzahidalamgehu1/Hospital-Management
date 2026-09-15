@@ -8,6 +8,14 @@ import {
   FaUsers,
   FaCalendarAlt,
   FaSignOutAlt,
+  FaStethoscope,
+  FaGraduationCap,
+  FaBriefcase,
+  FaPhoneAlt,
+  FaMoneyBillWave,
+  FaBuilding,
+  FaClock,
+  FaCalendarCheck,
 } from "react-icons/fa";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 
@@ -19,14 +27,17 @@ const DoctorProfile = () => {
   const location = useLocation();
 
   const [doctor, setDoctor] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [departments, setDepartments] = useState([]);
 
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
+    department: "",
     specialization: "",
     qualifications: "",
     experience: "",
@@ -37,9 +48,19 @@ const DoctorProfile = () => {
     endTime: "",
   });
 
-  // ==========================================
-  // GET DOCTOR PROFILE
-  // ==========================================
+  const days = [
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+    "Sunday",
+  ];
+
+  // ==================================================
+  // FETCH DOCTOR PROFILE
+  // ==================================================
 
   const fetchProfile = async () => {
     try {
@@ -50,20 +71,37 @@ const DoctorProfile = () => {
 
       const doctorData = response.data.doctor;
 
+      if (!doctorData) {
+        setDoctor(null);
+        setEditing(true);
+        return;
+      }
+
       setDoctor(doctorData);
 
       setFormData({
+        department:
+          doctorData.department?._id ||
+          doctorData.department ||
+          "",
         specialization: doctorData.specialization || "",
         qualifications: doctorData.qualifications || "",
         experience: doctorData.experience ?? "",
         phone: doctorData.phone || "",
-        consultationFee: doctorData.consultationFee ?? "",
-        availableDays: doctorData.availableDays || [],
-        startTime: doctorData.availableTime?.start || "",
-        endTime: doctorData.availableTime?.end || "",
+        consultationFee:
+          doctorData.consultationFee ?? "",
+        availableDays:
+          doctorData.availableDays || [],
+        startTime:
+          doctorData.availableTime?.start || "",
+        endTime:
+          doctorData.availableTime?.end || "",
       });
     } catch (error) {
-      console.error("Fetch doctor profile error:", error);
+      console.error(
+        "Fetch doctor profile error:",
+        error
+      );
 
       setError(
         error.response?.data?.message ||
@@ -74,13 +112,42 @@ const DoctorProfile = () => {
     }
   };
 
+  // ==================================================
+  // FETCH DEPARTMENTS
+  // ==================================================
+
+  const fetchDepartments = async () => {
+    try {
+      const response = await api.get("/departments");
+
+      setDepartments(
+        response.data.departments || []
+      );
+    } catch (error) {
+      console.error(
+        "Fetch departments error:",
+        error
+      );
+
+      setError(
+        error.response?.data?.message ||
+          "Failed to load departments"
+      );
+    }
+  };
+
+  // ==================================================
+  // INITIAL LOAD
+  // ==================================================
+
   useEffect(() => {
     fetchProfile();
+    fetchDepartments();
   }, []);
 
-  // ==========================================
-  // HANDLE INPUT CHANGE
-  // ==========================================
+  // ==================================================
+  // HANDLE INPUT
+  // ==================================================
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -91,16 +158,16 @@ const DoctorProfile = () => {
     }));
   };
 
-  // ==========================================
-  // HANDLE AVAILABLE DAYS
-  // ==========================================
+  // ==================================================
+  // HANDLE DAYS
+  // ==================================================
 
   const handleDayChange = (day) => {
     setFormData((previousData) => {
-      const isSelected =
+      const selected =
         previousData.availableDays.includes(day);
 
-      if (isSelected) {
+      if (selected) {
         return {
           ...previousData,
           availableDays:
@@ -120,9 +187,9 @@ const DoctorProfile = () => {
     });
   };
 
-  // ==========================================
-  // EDIT PROFILE
-  // ==========================================
+  // ==================================================
+  // EDIT
+  // ==================================================
 
   const handleEdit = () => {
     setMessage("");
@@ -130,48 +197,126 @@ const DoctorProfile = () => {
     setEditing(true);
   };
 
-  // ==========================================
-  // CANCEL EDIT
-  // ==========================================
+  // ==================================================
+  // CANCEL
+  // ==================================================
 
   const handleCancel = () => {
-    setEditing(false);
     setMessage("");
     setError("");
 
-    // Restore original doctor data
+    if (!doctor) {
+      return;
+    }
+
     setFormData({
-      specialization: doctor.specialization || "",
-      qualifications: doctor.qualifications || "",
-      experience: doctor.experience ?? "",
-      phone: doctor.phone || "",
-      consultationFee: doctor.consultationFee ?? "",
-      availableDays: doctor.availableDays || [],
-      startTime: doctor.availableTime?.start || "",
-      endTime: doctor.availableTime?.end || "",
+      department:
+        doctor.department?._id ||
+        doctor.department ||
+        "",
+      specialization:
+        doctor.specialization || "",
+      qualifications:
+        doctor.qualifications || "",
+      experience:
+        doctor.experience ?? "",
+      phone:
+        doctor.phone || "",
+      consultationFee:
+        doctor.consultationFee ?? "",
+      availableDays:
+        doctor.availableDays || [],
+      startTime:
+        doctor.availableTime?.start || "",
+      endTime:
+        doctor.availableTime?.end || "",
     });
+
+    setEditing(false);
   };
 
-  // ==========================================
-  // UPDATE PROFILE
-  // ==========================================
+  // ==================================================
+  // SAVE PROFILE
+  // ==================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    setMessage("");
+    setError("");
+
+    if (!formData.department) {
+      setError("Please select a department.");
+      return;
+    }
+
+    if (!formData.specialization.trim()) {
+      setError("Please enter your specialization.");
+      return;
+    }
+
+    if (!formData.qualifications.trim()) {
+      setError("Please enter your qualifications.");
+      return;
+    }
+
+    if (formData.experience === "") {
+      setError("Please enter your experience.");
+      return;
+    }
+
+    if (!formData.phone.trim()) {
+      setError("Please enter your phone number.");
+      return;
+    }
+
+    if (formData.consultationFee === "") {
+      setError(
+        "Please enter your consultation fee."
+      );
+      return;
+    }
+
+    if (!formData.startTime) {
+      setError("Please select your start time.");
+      return;
+    }
+
+    if (!formData.endTime) {
+      setError("Please select your end time.");
+      return;
+    }
+
+    if (formData.availableDays.length === 0) {
+      setError(
+        "Please select at least one available day."
+      );
+      return;
+    }
+
     try {
-      setMessage("");
-      setError("");
+      setSaving(true);
 
       const response = await api.put("/doctors/me", {
-        specialization: formData.specialization,
-        qualifications: formData.qualifications,
-        experience: Number(formData.experience),
-        phone: formData.phone,
-        consultationFee: Number(
-          formData.consultationFee
-        ),
-        availableDays: formData.availableDays,
+        department: formData.department,
+
+        specialization:
+          formData.specialization.trim(),
+
+        qualifications:
+          formData.qualifications.trim(),
+
+        experience:
+          Number(formData.experience),
+
+        phone:
+          formData.phone.trim(),
+
+        consultationFee:
+          Number(formData.consultationFee),
+
+        availableDays:
+          formData.availableDays,
 
         availableTime: {
           start: formData.startTime,
@@ -179,303 +324,193 @@ const DoctorProfile = () => {
         },
       });
 
-      setDoctor(response.data.doctor);
+      const savedDoctor = response.data.doctor;
+
+      setDoctor(savedDoctor);
+
+      setFormData({
+        department:
+          savedDoctor.department?._id ||
+          savedDoctor.department ||
+          "",
+
+        specialization:
+          savedDoctor.specialization || "",
+
+        qualifications:
+          savedDoctor.qualifications || "",
+
+        experience:
+          savedDoctor.experience ?? "",
+
+        phone:
+          savedDoctor.phone || "",
+
+        consultationFee:
+          savedDoctor.consultationFee ?? "",
+
+        availableDays:
+          savedDoctor.availableDays || [],
+
+        startTime:
+          savedDoctor.availableTime?.start || "",
+
+        endTime:
+          savedDoctor.availableTime?.end || "",
+      });
+
+      setEditing(false);
 
       setMessage(
         response.data.message ||
-          "Profile updated successfully"
+          "Doctor profile saved successfully."
       );
-
-      setEditing(false);
     } catch (error) {
-      console.error("Update doctor profile error:", error);
+      console.error(
+        "Save doctor profile error:",
+        error
+      );
 
       setError(
         error.response?.data?.message ||
-          "Failed to update doctor profile"
+          "Failed to save doctor profile."
       );
+    } finally {
+      setSaving(false);
     }
   };
 
-  // ==========================================
+  // ==================================================
   // LOGOUT
-  // ==========================================
+  // ==================================================
 
   const handleLogout = () => {
     navigate("/login");
   };
 
-  // ==========================================
+  // ==================================================
+  // NAVBAR
+  // ==================================================
+
+  const Navbar = () => (
+    <nav className="doctor-navbar">
+      <div className="doctor-navbar-container">
+
+        <Link
+          to="/doctor"
+          className="doctor-navbar-logo"
+        >
+          <FaUserMd />
+          <span>MediCare</span>
+        </Link>
+
+        <div className="doctor-navbar-links">
+
+          <Link
+            to="/doctor"
+            className={`doctor-nav-link ${
+              location.pathname === "/doctor"
+                ? "active"
+                : ""
+            }`}
+          >
+            <FaHome />
+            <span>Dashboard</span>
+          </Link>
+
+          <Link
+            to="/doctor/patients"
+            className={`doctor-nav-link ${
+              location.pathname ===
+              "/doctor/patients"
+                ? "active"
+                : ""
+            }`}
+          >
+            <FaUsers />
+            <span>My Patients</span>
+          </Link>
+
+          <Link
+            to="/doctor/appointments"
+            className={`doctor-nav-link ${
+              location.pathname ===
+              "/doctor/appointments"
+                ? "active"
+                : ""
+            }`}
+          >
+            <FaCalendarAlt />
+            <span>Appointments</span>
+          </Link>
+
+          <Link
+            to="/doctor/profile"
+            className={`doctor-nav-link ${
+              location.pathname ===
+              "/doctor/profile"
+                ? "active"
+                : ""
+            }`}
+          >
+            <FaUserMd />
+            <span>My Profile</span>
+          </Link>
+
+        </div>
+
+        <button
+          className="doctor-logout-btn"
+          onClick={handleLogout}
+        >
+          <FaSignOutAlt />
+          <span>Logout</span>
+        </button>
+
+      </div>
+    </nav>
+  );
+
+  // ==================================================
   // LOADING
-  // ==========================================
+  // ==================================================
 
   if (loading) {
     return (
       <div className="doctor-profile-wrapper">
-
-        {/* Navbar */}
-        <nav className="doctor-navbar">
-          <div className="doctor-navbar-container">
-
-            <Link
-              to="/doctor"
-              className="doctor-navbar-logo"
-            >
-              <FaUserMd />
-              <span>MediCare</span>
-            </Link>
-
-            <div className="doctor-navbar-links">
-
-              <Link
-                to="/doctor"
-                className="doctor-nav-link"
-              >
-                <FaHome />
-                <span>Dashboard</span>
-              </Link>
-
-              <Link
-                to="/doctor/patients"
-                className="doctor-nav-link"
-              >
-                <FaUsers />
-                <span>My Patients</span>
-              </Link>
-
-              <Link
-                to="/doctor/appointments"
-                className="doctor-nav-link"
-              >
-                <FaCalendarAlt />
-                <span>Appointments</span>
-              </Link>
-
-              <Link
-                to="/doctor/profile"
-                className="doctor-nav-link active"
-              >
-                <FaUserMd />
-                <span>My Profile</span>
-              </Link>
-
-            </div>
-
-            <button
-              className="doctor-logout-btn"
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt />
-              <span>Logout</span>
-            </button>
-
-          </div>
-        </nav>
+        <Navbar />
 
         <div className="doctor-profile-loading">
-          Loading doctor profile...
-        </div>
-
-      </div>
-    );
-  }
-
-  // ==========================================
-  // PROFILE NOT FOUND
-  // ==========================================
-
-  if (!doctor) {
-    return (
-      <div className="doctor-profile-wrapper">
-
-        {/* Navbar */}
-        <nav className="doctor-navbar">
-          <div className="doctor-navbar-container">
-
-            <Link
-              to="/doctor"
-              className="doctor-navbar-logo"
-            >
-              <FaUserMd />
-              <span>MediCare</span>
-            </Link>
-
-            <div className="doctor-navbar-links">
-
-              <Link
-                to="/doctor"
-                className="doctor-nav-link"
-              >
-                <FaHome />
-                <span>Dashboard</span>
-              </Link>
-
-              <Link
-                to="/doctor/patients"
-                className="doctor-nav-link"
-              >
-                <FaUsers />
-                <span>My Patients</span>
-              </Link>
-
-              <Link
-                to="/doctor/appointments"
-                className="doctor-nav-link"
-              >
-                <FaCalendarAlt />
-                <span>Appointments</span>
-              </Link>
-
-              <Link
-                to="/doctor/profile"
-                className="doctor-nav-link active"
-              >
-                <FaUserMd />
-                <span>My Profile</span>
-              </Link>
-
-            </div>
-
-            <button
-              className="doctor-logout-btn"
-              onClick={handleLogout}
-            >
-              <FaSignOutAlt />
-              <span>Logout</span>
-            </button>
-
+          <div className="profile-loader">
+            <FaUserMd />
           </div>
-        </nav>
 
-        <div className="doctor-profile-error">
-          {error || "Doctor profile not found"}
+          <h3>
+            Loading your profile...
+          </h3>
+
+          <p>
+            Please wait while we fetch your information.
+          </p>
         </div>
-
       </div>
     );
   }
+
+  // ==================================================
+  // MAIN UI
+  // ==================================================
 
   return (
     <div className="doctor-profile-wrapper">
 
-      {/* ==================================================
-          DOCTOR NAVBAR
-      ================================================== */}
-
-      <nav className="doctor-navbar">
-
-        <div className="doctor-navbar-container">
-
-          {/* Logo */}
-
-          <Link
-            to="/doctor"
-            className="doctor-navbar-logo"
-          >
-            <FaUserMd />
-
-            <span>MediCare</span>
-          </Link>
-
-
-          {/* Navigation */}
-
-          <div className="doctor-navbar-links">
-
-            <Link
-              to="/doctor"
-              className={`doctor-nav-link ${
-                location.pathname === "/doctor"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <FaHome />
-
-              <span>
-                Dashboard
-              </span>
-            </Link>
-
-
-            <Link
-              to="/doctor/patients"
-              className={`doctor-nav-link ${
-                location.pathname ===
-                "/doctor/patients"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <FaUsers />
-
-              <span>
-                My Patients
-              </span>
-            </Link>
-
-
-            <Link
-              to="/doctor/appointments"
-              className={`doctor-nav-link ${
-                location.pathname ===
-                "/doctor/appointments"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <FaCalendarAlt />
-
-              <span>
-                Appointments
-              </span>
-            </Link>
-
-
-            <Link
-              to="/doctor/profile"
-              className={`doctor-nav-link ${
-                location.pathname ===
-                "/doctor/profile"
-                  ? "active"
-                  : ""
-              }`}
-            >
-              <FaUserMd />
-
-              <span>
-                My Profile
-              </span>
-            </Link>
-
-          </div>
-
-
-          {/* Logout */}
-
-          <button
-            className="doctor-logout-btn"
-            onClick={handleLogout}
-          >
-            <FaSignOutAlt />
-
-            <span>
-              Logout
-            </span>
-          </button>
-
-        </div>
-
-      </nav>
-
-
-      {/* ==================================================
-          PROFILE CONTENT
-      ================================================== */}
+      <Navbar />
 
       <main className="doctor-profile-page">
 
-        {/* Header */}
+        {/* ==========================================
+            PAGE HEADER
+        ========================================== */}
 
         <div className="doctor-profile-header">
 
@@ -497,132 +532,141 @@ const DoctorProfile = () => {
 
           </div>
 
-
-          {/* Edit / Cancel */}
-
-          {!editing ? (
-
+          {doctor && !editing && (
             <button
               className="doctor-edit-btn"
               onClick={handleEdit}
             >
               <FaEdit />
-
               Edit Profile
             </button>
+          )}
 
-          ) : (
-
+          {doctor && editing && (
             <button
               className="doctor-cancel-btn"
               onClick={handleCancel}
             >
               <FaTimes />
-
               Cancel
             </button>
-
           )}
 
         </div>
 
-
-        {/* Success Message */}
+        {/* ==========================================
+            MESSAGES
+        ========================================== */}
 
         {message && (
           <div className="doctor-success-message">
-            {message}
+            <FaCalendarCheck />
+            <span>{message}</span>
           </div>
         )}
-
-
-        {/* Error Message */}
 
         {error && (
           <div className="doctor-error-message">
-            {error}
+            <FaTimes />
+            <span>{error}</span>
           </div>
         )}
 
+        {/* ==========================================
+            COMPLETE PROFILE INTRO
+        ========================================== */}
 
-        {/* ==================================================
+        {!doctor && editing && (
+          <div className="profile-completion-banner">
+
+            <div className="completion-banner-icon">
+              <FaStethoscope />
+            </div>
+
+            <div>
+              <h2>
+                Complete Your Professional Profile
+              </h2>
+
+              <p>
+                Your doctor account is ready.
+                Add your professional details below
+                to complete your profile.
+              </p>
+            </div>
+
+          </div>
+        )}
+
+        {/* ==========================================
             VIEW PROFILE
-        ================================================== */}
+        ========================================== */}
 
-        {!editing ? (
+        {doctor && !editing ? (
 
           <div className="doctor-profile-grid">
 
-            {/* Basic Information */}
+            {/* BASIC INFORMATION */}
 
             <section className="doctor-profile-card">
 
-              <h2>
-                Basic Information
-              </h2>
+              <div className="profile-card-heading">
+
+                <div className="profile-section-icon">
+                  <FaUserMd />
+                </div>
+
+                <div>
+                  <h2>
+                    Basic Information
+                  </h2>
+
+                  <p>
+                    Your account information
+                  </p>
+                </div>
+
+              </div>
 
               <div className="doctor-info-grid">
 
                 <div className="doctor-info-item">
-                  <span>
-                    Name
-                  </span>
-
+                  <span>Name</span>
                   <strong>
                     {doctor.user?.name || "N/A"}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Email
-                  </span>
-
+                  <span>Email</span>
                   <strong>
                     {doctor.user?.email || "N/A"}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Phone
-                  </span>
-
+                  <span>Phone</span>
                   <strong>
                     {doctor.phone || "N/A"}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Specialization
-                  </span>
-
+                  <span>Specialization</span>
                   <strong>
                     {doctor.specialization || "N/A"}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Qualifications
-                  </span>
-
+                  <span>Qualifications</span>
                   <strong>
                     {doctor.qualifications || "N/A"}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Experience
-                  </span>
-
+                  <span>Experience</span>
                   <strong>
                     {doctor.experience ?? 0} years
                   </strong>
@@ -632,44 +676,47 @@ const DoctorProfile = () => {
 
             </section>
 
-
-            {/* Professional Information */}
+            {/* PROFESSIONAL INFORMATION */}
 
             <section className="doctor-profile-card">
 
-              <h2>
-                Professional Information
-              </h2>
+              <div className="profile-card-heading">
+
+                <div className="profile-section-icon">
+                  <FaStethoscope />
+                </div>
+
+                <div>
+                  <h2>
+                    Professional Information
+                  </h2>
+
+                  <p>
+                    Your medical practice details
+                  </p>
+                </div>
+
+              </div>
 
               <div className="doctor-info-grid">
 
                 <div className="doctor-info-item">
-                  <span>
-                    Department
-                  </span>
-
+                  <span>Department</span>
                   <strong>
-                    {doctor.department?.name || "N/A"}
+                    {doctor.department?.name ||
+                      "N/A"}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Consultation Fee
-                  </span>
-
+                  <span>Consultation Fee</span>
                   <strong>
                     ₹{doctor.consultationFee || 0}
                   </strong>
                 </div>
 
-
                 <div className="doctor-info-item">
-                  <span>
-                    Status
-                  </span>
-
+                  <span>Status</span>
                   <strong className="doctor-active-status">
                     {doctor.status || "active"}
                   </strong>
@@ -679,14 +726,27 @@ const DoctorProfile = () => {
 
             </section>
 
-
-            {/* Availability */}
+            {/* AVAILABILITY */}
 
             <section className="doctor-profile-card">
 
-              <h2>
-                Availability
-              </h2>
+              <div className="profile-card-heading">
+
+                <div className="profile-section-icon">
+                  <FaClock />
+                </div>
+
+                <div>
+                  <h2>
+                    Availability
+                  </h2>
+
+                  <p>
+                    Your consultation schedule
+                  </p>
+                </div>
+
+              </div>
 
               <div className="availability-section">
 
@@ -698,31 +758,26 @@ const DoctorProfile = () => {
 
                   <div className="doctor-days">
 
-                    {doctor.availableDays?.length > 0 ? (
-
-                      doctor.availableDays.map((day) => (
-
-                        <span
-                          className="doctor-day"
-                          key={day}
-                        >
-                          {day}
+                    {doctor.availableDays?.length > 0
+                      ? doctor.availableDays.map(
+                          (day) => (
+                            <span
+                              className="doctor-day"
+                              key={day}
+                            >
+                              {day}
+                            </span>
+                          )
+                        )
+                      : (
+                        <span>
+                          No days added
                         </span>
-
-                      ))
-
-                    ) : (
-
-                      <span>
-                        No days added
-                      </span>
-
-                    )}
+                      )}
 
                   </div>
 
                 </div>
-
 
                 <div className="doctor-time">
 
@@ -733,9 +788,7 @@ const DoctorProfile = () => {
                   <strong>
                     {doctor.availableTime?.start ||
                       "--:--"}
-
                     {" - "}
-
                     {doctor.availableTime?.end ||
                       "--:--"}
                   </strong>
@@ -750,28 +803,87 @@ const DoctorProfile = () => {
 
         ) : (
 
-          /* ==================================================
-             EDIT PROFILE
-          ================================================== */
+          /* ==========================================
+             CREATE / EDIT FORM
+          ========================================== */
 
           <form
-            className="doctor-profile-form"
+            className="doctor-profile-form attractive-form"
             onSubmit={handleSubmit}
           >
 
-            {/* Professional Information */}
+            {/* ======================================
+                PROFESSIONAL INFORMATION
+            ====================================== */}
 
-            <section className="doctor-profile-card">
+            <section className="doctor-profile-card form-section">
 
-              <h2>
-                Edit Professional Information
-              </h2>
+              <div className="form-section-header">
+
+                <div className="form-section-icon">
+                  <FaStethoscope />
+                </div>
+
+                <div>
+                  <h2>
+                    Professional Information
+                  </h2>
+
+                  <p>
+                    Tell us about your medical expertise
+                  </p>
+                </div>
+
+              </div>
 
               <div className="doctor-form-grid">
+
+                {/* Department */}
 
                 <div className="doctor-form-group">
 
                   <label>
+                    <FaBuilding />
+                    Department
+                  </label>
+
+                  <select
+                    name="department"
+                    value={formData.department}
+                    onChange={handleChange}
+                    required
+                  >
+
+                    <option value="">
+                      Select your department
+                    </option>
+
+                    {departments.map(
+                      (department) => (
+                        <option
+                          key={department._id}
+                          value={department._id}
+                        >
+                          {department.name}
+                        </option>
+                      )
+                    )}
+
+                  </select>
+
+                  <small>
+                    Select the department where you
+                    practice.
+                  </small>
+
+                </div>
+
+                {/* Specialization */}
+
+                <div className="doctor-form-group">
+
+                  <label>
+                    <FaStethoscope />
                     Specialization
                   </label>
 
@@ -780,15 +892,22 @@ const DoctorProfile = () => {
                     name="specialization"
                     value={formData.specialization}
                     onChange={handleChange}
+                    placeholder="e.g. Cardiologist"
                     required
                   />
 
+                  <small>
+                    Your primary medical specialization.
+                  </small>
+
                 </div>
 
+                {/* Qualifications */}
 
                 <div className="doctor-form-group">
 
                   <label>
+                    <FaGraduationCap />
                     Qualifications
                   </label>
 
@@ -797,157 +916,277 @@ const DoctorProfile = () => {
                     name="qualifications"
                     value={formData.qualifications}
                     onChange={handleChange}
+                    placeholder="e.g. MBBS, MD"
                     required
                   />
 
+                  <small>
+                    Enter your medical degrees and
+                    qualifications.
+                  </small>
+
                 </div>
 
+                {/* Experience */}
 
                 <div className="doctor-form-group">
 
                   <label>
-                    Experience (Years)
+                    <FaBriefcase />
+                    Experience
                   </label>
 
-                  <input
-                    type="number"
-                    name="experience"
-                    min="0"
-                    value={formData.experience}
-                    onChange={handleChange}
-                    required
-                  />
-
-                </div>
-
-
-                <div className="doctor-form-group">
-
-                  <label>
-                    Phone
-                  </label>
-
-                  <input
-                    type="text"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    required
-                  />
-
-                </div>
-
-
-                <div className="doctor-form-group">
-
-                  <label>
-                    Consultation Fee
-                  </label>
-
-                  <input
-                    type="number"
-                    name="consultationFee"
-                    min="0"
-                    value={formData.consultationFee}
-                    onChange={handleChange}
-                    required
-                  />
-
-                </div>
-
-              </div>
-
-            </section>
-
-
-            {/* Available Days */}
-
-            <section className="doctor-profile-card">
-
-              <h2>
-                Available Days
-              </h2>
-
-              <div className="doctor-days-selection">
-
-                {[
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday",
-                  "Sunday",
-                ].map((day) => (
-
-                  <label
-                    key={day}
-                    className="doctor-day-checkbox"
-                  >
+                  <div className="input-with-suffix">
 
                     <input
-                      type="checkbox"
-                      checked={formData.availableDays.includes(
-                        day
-                      )}
-                      onChange={() =>
-                        handleDayChange(day)
-                      }
+                      type="number"
+                      name="experience"
+                      min="0"
+                      value={formData.experience}
+                      onChange={handleChange}
+                      placeholder="5"
+                      required
                     />
 
                     <span>
-                      {day}
+                      Years
                     </span>
 
+                  </div>
+
+                  <small>
+                    Total professional experience.
+                  </small>
+
+                </div>
+
+                {/* Phone */}
+
+                <div className="doctor-form-group">
+
+                  <label>
+                    <FaPhoneAlt />
+                    Phone Number
                   </label>
 
-                ))}
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleChange}
+                    placeholder="e.g. 9876543210"
+                    required
+                  />
+
+                  <small>
+                    Patients may use this for contact.
+                  </small>
+
+                </div>
+
+                {/* Consultation Fee */}
+
+                <div className="doctor-form-group">
+
+                  <label>
+                    <FaMoneyBillWave />
+                    Consultation Fee
+                  </label>
+
+                  <div className="input-with-prefix">
+
+                    <span>
+                      ₹
+                    </span>
+
+                    <input
+                      type="number"
+                      name="consultationFee"
+                      min="0"
+                      value={
+                        formData.consultationFee
+                      }
+                      onChange={handleChange}
+                      placeholder="500"
+                      required
+                    />
+
+                  </div>
+
+                  <small>
+                    Your standard consultation charge.
+                  </small>
+
+                </div>
 
               </div>
 
             </section>
 
+            {/* ======================================
+                AVAILABLE DAYS
+            ====================================== */}
 
-            {/* Available Time */}
+            <section className="doctor-profile-card form-section">
 
-            <section className="doctor-profile-card">
+              <div className="form-section-header">
 
-              <h2>
-                Available Time
-              </h2>
+                <div className="form-section-icon">
+                  <FaCalendarCheck />
+                </div>
 
-              <div className="doctor-form-grid">
+                <div>
+                  <h2>
+                    Available Days
+                  </h2>
 
-                <div className="doctor-form-group">
+                  <p>
+                    Choose the days when patients can
+                    book appointments.
+                  </p>
+                </div>
 
-                  <label>
-                    Start Time
-                  </label>
+              </div>
 
-                  <input
-                    type="time"
-                    name="startTime"
-                    value={formData.startTime}
-                    onChange={handleChange}
-                    required
-                  />
+              <div className="doctor-days-selection">
+
+                {days.map((day) => {
+
+                  const selected =
+                    formData.availableDays.includes(
+                      day
+                    );
+
+                  return (
+                    <button
+                      type="button"
+                      key={day}
+                      className={`day-select-btn ${
+                        selected
+                          ? "selected"
+                          : ""
+                      }`}
+                      onClick={() =>
+                        handleDayChange(day)
+                      }
+                    >
+
+                      <span className="day-short">
+                        {day.substring(0, 3)}
+                      </span>
+
+                      <span>
+                        {day}
+                      </span>
+
+                      {selected && (
+                        <FaCalendarCheck />
+                      )}
+
+                    </button>
+                  );
+                })}
+
+              </div>
+
+              <div className="selected-days-info">
+
+                <FaCalendarCheck />
+
+                <span>
+                  {formData.availableDays.length ===
+                  0
+                    ? "No days selected"
+                    : `${formData.availableDays.length} day${
+                        formData.availableDays.length >
+                        1
+                          ? "s"
+                          : ""
+                      } selected`}
+                </span>
+
+              </div>
+
+            </section>
+
+            {/* ======================================
+                AVAILABLE TIME
+            ====================================== */}
+
+            <section className="doctor-profile-card form-section">
+
+              <div className="form-section-header">
+
+                <div className="form-section-icon">
+                  <FaClock />
+                </div>
+
+                <div>
+                  <h2>
+                    Consultation Hours
+                  </h2>
+
+                  <p>
+                    Set your daily consultation
+                    availability.
+                  </p>
+                </div>
+
+              </div>
+
+              <div className="time-selection-grid">
+
+                <div className="time-box">
+
+                  <div className="time-box-icon">
+                    <FaClock />
+                  </div>
+
+                  <div className="doctor-form-group">
+
+                    <label>
+                      Start Time
+                    </label>
+
+                    <input
+                      type="time"
+                      name="startTime"
+                      value={formData.startTime}
+                      onChange={handleChange}
+                      required
+                    />
+
+                  </div>
 
                 </div>
 
+                <div className="time-divider">
+                  <span>
+                    TO
+                  </span>
+                </div>
 
-                <div className="doctor-form-group">
+                <div className="time-box">
 
-                  <label>
-                    End Time
-                  </label>
+                  <div className="time-box-icon">
+                    <FaClock />
+                  </div>
 
-                  <input
-                    type="time"
-                    name="endTime"
-                    value={formData.endTime}
-                    onChange={handleChange}
-                    required
-                  />
+                  <div className="doctor-form-group">
+
+                    <label>
+                      End Time
+                    </label>
+
+                    <input
+                      type="time"
+                      name="endTime"
+                      value={formData.endTime}
+                      onChange={handleChange}
+                      required
+                    />
+
+                  </div>
 
                 </div>
 
@@ -955,17 +1194,62 @@ const DoctorProfile = () => {
 
             </section>
 
+            {/* ======================================
+                FORM FOOTER
+            ====================================== */}
 
-            {/* Save Button */}
+            <div className="doctor-form-footer">
 
-            <button
-              type="submit"
-              className="doctor-save-btn"
-            >
-              <FaSave />
+              <div className="form-footer-text">
 
-              Save Changes
-            </button>
+                <FaUserMd />
+
+                <div>
+                  <strong>
+                    Ready to save your profile?
+                  </strong>
+
+                  <span>
+                    Your information will be securely
+                    saved to your doctor profile.
+                  </span>
+                </div>
+
+              </div>
+
+              <div className="form-footer-actions">
+
+                {doctor && (
+                  <button
+                    type="button"
+                    className="form-cancel-btn"
+                    onClick={handleCancel}
+                    disabled={saving}
+                  >
+                    <FaTimes />
+                    Cancel
+                  </button>
+                )}
+
+                <button
+                  type="submit"
+                  className="doctor-save-btn attractive-save-btn"
+                  disabled={saving}
+                >
+
+                  <FaSave />
+
+                  {saving
+                    ? "Saving..."
+                    : doctor
+                    ? "Save Changes"
+                    : "Create Doctor Profile"}
+
+                </button>
+
+              </div>
+
+            </div>
 
           </form>
 

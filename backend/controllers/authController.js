@@ -5,26 +5,36 @@ const jwt = require("jsonwebtoken");
 
 // Register a new user
 const registerUser = async (req, res) => {
-  const { name, email, password, role } = req.body;
-
   try {
+    const { name, email, password, role } = req.body;
 
-    //check if all fields are provided
+    // Check required fields
     if (!name || !email || !password || !role) {
-      return res.status(400).json({ message: "Please provide all required fields" });
+      return res.status(400).json({
+        message: "Name, email, password and role are required",
+      });
     }
 
-    // Check if user already exists
+    // Check valid role
+    if (!["doctor", "patient"].includes(role)) {
+      return res.status(400).json({
+        message: "Invalid role",
+      });
+    }
+
+    // Check existing user
     const existingUser = await User.findOne({ email });
+
     if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
+      return res.status(400).json({
+        message: "User already exists",
+      });
     }
 
-    // Hash the password
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
 
-    // Create new user
+    // Create User only
     const user = await User.create({
       name,
       email,
@@ -32,35 +42,45 @@ const registerUser = async (req, res) => {
       role,
     });
 
-    // Generate JWT token
+    // Generate JWT
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      {
+        id: user._id,
+        role: user.role,
+      },
       process.env.JWT_SECRET,
-      { expiresIn: "1h" }
+      {
+        expiresIn: "1h",
+      }
     );
 
-    if (user.role === "patient") {
-      await Patient.create({
-        user: user._id,
-        dateOfBirth: new Date(),
-        gender: "other",
-        bloodGroup: "O+",
-        phone: "Not provided",
-        address: "Not provided",
-        emergencyContact: {
-          name: "Not provided",
-          phone: "Not provided",
-          relationship: "Not provided",
-        },
-      });
-    }
+    // Cookie
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite:
+        process.env.NODE_ENV === "production"
+          ? "none"
+          : "lax",
+      maxAge: 60 * 60 * 1000,
+    });
 
     res.status(201).json({
-      token,
-      user: { id: user._id, name: user.name, email: user.email, role: user.role },
+      message: "User registered successfully",
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("Register error:", error);
+
+    res.status(500).json({
+      message: "Registration failed",
+      error: error.message,
+    });
   }
 };
 

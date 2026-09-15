@@ -191,7 +191,118 @@ const deleteDoctor = async (req, res) => {
     });
   }
 };
+
+// Create Doctor Profile / Update Doctor Profile
 // Get logged-in doctor profile
+const updateMyDoctorProfile = async (req, res) => {
+  try {
+    const {
+      department,
+      specialization,
+      qualifications,
+      experience,
+      phone,
+      consultationFee,
+      availableDays,
+      availableTime,
+    } = req.body;
+
+    // Check required fields
+    if (
+      !department ||
+      !specialization ||
+      !qualifications ||
+      experience === undefined ||
+      !phone ||
+      consultationFee === undefined ||
+      !availableTime?.start
+    ) {
+      return res.status(400).json({
+        message: "Please fill all doctor profile fields",
+      });
+    }
+
+    // Check department
+    const departmentExists = await Department.findById(department);
+
+    if (!departmentExists) {
+      return res.status(404).json({
+        message: "Department not found",
+      });
+    }
+
+    // Check logged-in user
+    const user = await User.findById(req.user.id);
+
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found",
+      });
+    }
+
+    // Make sure user is doctor
+    if (user.role !== "doctor") {
+      return res.status(403).json({
+        message: "Only doctors can create doctor profile",
+      });
+    }
+
+    // Find existing Doctor profile
+    let doctor = await Doctor.findOne({
+      user: req.user.id,
+    });
+
+    // If Doctor profile doesn't exist → CREATE
+    if (!doctor) {
+      doctor = await Doctor.create({
+        user: req.user.id,
+        department,
+        specialization,
+        qualifications,
+        experience,
+        phone,
+        consultationFee,
+        availableDays: availableDays || [],
+        availableTime,
+      });
+    }
+
+    // If Doctor profile exists → UPDATE
+    else {
+      doctor.department = department;
+      doctor.specialization = specialization;
+      doctor.qualifications = qualifications;
+      doctor.experience = experience;
+      doctor.phone = phone;
+      doctor.consultationFee = consultationFee;
+      doctor.availableDays = availableDays || [];
+      doctor.availableTime = availableTime;
+
+      await doctor.save();
+    }
+
+    // Get updated doctor
+    const updatedDoctor = await Doctor.findById(doctor._id)
+      .populate("user", "name email role")
+      .populate("department", "name description");
+
+    res.status(200).json({
+      message: "Doctor profile saved successfully",
+      profileCompleted: true,
+      doctor: updatedDoctor,
+    });
+  } catch (error) {
+    console.error("Update doctor profile error:", error);
+
+    res.status(500).json({
+      message: "Failed to save doctor profile",
+      error: error.message,
+    });
+  }
+};
+
+
+// Get Doctor Profile
 const getMyDoctorProfile = async (req, res) => {
   try {
     const doctor = await Doctor.findOne({
@@ -200,13 +311,16 @@ const getMyDoctorProfile = async (req, res) => {
       .populate("user", "name email role")
       .populate("department", "name description");
 
+    // Doctor profile doesn't exist yet
     if (!doctor) {
-      return res.status(404).json({
-        message: "Doctor profile not found",
+      return res.status(200).json({
+        profileCompleted: false,
+        doctor: null,
       });
     }
 
     res.status(200).json({
+      profileCompleted: true,
       doctor,
     });
   } catch (error) {
@@ -219,77 +333,6 @@ const getMyDoctorProfile = async (req, res) => {
   }
 };
 
-
-// Update logged-in doctor profile
-const updateMyDoctorProfile = async (req, res) => {
-  try {
-    const {
-      specialization,
-      qualifications,
-      experience,
-      phone,
-      consultationFee,
-      availableDays,
-      availableTime,
-    } = req.body;
-
-    const doctor = await Doctor.findOne({
-      user: req.user.id,
-    });
-
-    if (!doctor) {
-      return res.status(404).json({
-        message: "Doctor profile not found",
-      });
-    }
-
-    if (specialization !== undefined) {
-      doctor.specialization = specialization;
-    }
-
-    if (qualifications !== undefined) {
-      doctor.qualifications = qualifications;
-    }
-
-    if (experience !== undefined) {
-      doctor.experience = experience;
-    }
-
-    if (phone !== undefined) {
-      doctor.phone = phone;
-    }
-
-    if (consultationFee !== undefined) {
-      doctor.consultationFee = consultationFee;
-    }
-
-    if (availableDays !== undefined) {
-      doctor.availableDays = availableDays;
-    }
-
-    if (availableTime !== undefined) {
-      doctor.availableTime = availableTime;
-    }
-
-    await doctor.save();
-
-    const updatedDoctor = await Doctor.findById(doctor._id)
-      .populate("user", "name email role")
-      .populate("department", "name description");
-
-    res.status(200).json({
-      message: "Doctor profile updated successfully",
-      doctor: updatedDoctor,
-    });
-  } catch (error) {
-    console.error("Update doctor profile error:", error);
-
-    res.status(500).json({
-      message: "Failed to update doctor profile",
-      error: error.message,
-    });
-  }
-};
 
 module.exports = {
   createDoctor,
