@@ -21,19 +21,19 @@ connectDB();
 
 // Middleware
 
+
 const allowedOrigins = [
+  "http://localhost:5173",
   process.env.CLIENT_URL,
 ];
 
 app.use(
   cors({
     origin: function (origin, callback) {
-      console.log("REQUEST ORIGIN:", origin);
-      console.log("ALLOWED ORIGINS:", allowedOrigins);
-
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.log("Blocked origin:", origin);
         callback(new Error("Not allowed by CORS"));
       }
     },
