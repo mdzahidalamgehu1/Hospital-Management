@@ -20,6 +20,11 @@ const app = express();
 connectDB();
 
 // Middleware
+// const allowedOrigins = [
+//   "http://localhost:5173",
+//   process.env.CLIENT_URL,
+// ];
+
 const allowedOrigins = [
   "http://localhost:5173",
   process.env.CLIENT_URL,
@@ -28,17 +33,14 @@ const allowedOrigins = [
 app.use(
   cors({
     origin: function (origin, callback) {
-      // Allow requests with no origin
-      // (Postman, server-to-server, etc.)
-      if (!origin) {
-        return callback(null, true);
-      }
+      console.log("REQUEST ORIGIN:", origin);
+      console.log("ALLOWED ORIGINS:", allowedOrigins);
 
-      if (allowedOrigins.includes(origin)) {
-        return callback(null, true);
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
       }
-
-      return callback(new Error("Not allowed by CORS"));
     },
     credentials: true,
   })
@@ -67,3 +69,4 @@ const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
 });
+
