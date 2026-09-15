@@ -20,13 +20,8 @@ const app = express();
 connectDB();
 
 // Middleware
-// const allowedOrigins = [
-//   "http://localhost:5173",
-//   process.env.CLIENT_URL,
-// ];
 
 const allowedOrigins = [
-  "http://localhost:5173",
   process.env.CLIENT_URL,
 ];
 
