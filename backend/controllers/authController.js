@@ -63,67 +63,47 @@ const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Check required fields
+    //check if all fields are provided
     if (!email || !password) {
-      return res.status(400).json({
-        message: "Please provide all required fields",
-      });
+      return res.status(400).json({ message: "Please provide all required fields" });
     }
 
-    // Find user
+    //find user by email
     const user = await User.findOne({ email });
-
     if (!user) {
-      return res.status(400).json({
-        message: "Invalid email or password",
-      });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Check password
+    //check if password is correct
     const isMatch = await bcrypt.compare(password, user.password);
-
     if (!isMatch) {
-      return res.status(400).json({
-        message: "Invalid email or password",
-      });
+      return res.status(400).json({ message: "Invalid email or password" });
     }
 
-    // Generate JWT
+    // Generate JWT token
     const token = jwt.sign(
-      {
-        id: user._id,
-        role: user.role,
-      },
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      { expiresIn: "1h" }
     );
 
-    // Store JWT in HTTP-only cookie
+   //store the token in a cookie
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
-      maxAge: 60 * 60 * 1000,
+      maxAge: 3600000, // 1 hour
     });
 
-    res.status(200).json({
-      message: "Login successful",
-      user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
-      },
-    });
+    res.status(200).json({ message: "Login successful", user: {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+    } });
   } catch (error) {
-    console.error("Login error:", error);
-
-    res.status(500).json({
-      message: "Login failed",
-      error: error.message,
-    });
-  }
+    res.status(500).json({ message: error.message });
+    }
 };
+
 module.exports = { registerUser, loginUser };
